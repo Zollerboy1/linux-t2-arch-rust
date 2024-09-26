@@ -40,13 +40,13 @@ conflicts=('apple-gmux-t2-dkms-git')
 replaces=('apple-gmux-t2-dkms-git')
 options=('!strip')
 _srcname="linux-${pkgver}-arch${archrel}"
-T2_PATCH_HASH=c0db79a25bc37dbd0c27636914b3903016a2fc39
+T2_PATCH_HASH=0888a93f7ebabbfb8e6c5c8f108de188d3927eb1
 source=(
   https://github.com/archlinux/linux/archive/refs/tags/v${pkgver}-arch${archrel}.tar.gz
   config  # the main kernel config file
 
   # t2linux Patches
-  patches::git+https://github.com/t2linux/linux-t2-patches
+  patches::git+https://github.com/t2linux/linux-t2-patches#commit=$T2_PATCH_HASH
 )
 validpgpkeys=(
   ABAF11C65A2970B130ABE3C479BE3E4300411886  # Linus Torvalds
