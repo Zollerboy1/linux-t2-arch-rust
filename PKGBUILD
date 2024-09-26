@@ -4,7 +4,7 @@
 #               Additionally, MrARM and Ronald Tschalär wrote apple-bce and
 #               apple-ibridge drivers, respectively.
 
-pkgbase="linux-t2"
+pkgbase="linux-t2-rust"
 pkgver=6.10.9
 _srcname=linux-${pkgver}
 pkgrel=1
@@ -19,9 +19,13 @@ makedepends=(
   cpio
   gettext
   git
+  llvm
+  lld
   libelf
   pahole
   perl
+  python
+  rustup
   tar
   xz
 
@@ -55,19 +59,33 @@ export KBUILD_BUILD_TIMESTAMP="$(date -Ru${SOURCE_DATE_EPOCH:+d @$SOURCE_DATE_EP
 
 _make() {
   test -s version
-  make KERNELRELEASE="$(<version)" "$@"
+  make LLVM=1 KERNELRELEASE="$(<version)" "$@"
 }
 
 prepare() {
   cd $_srcname
 
   echo "Setting version..."
-  echo "-Adashima-T2" > localversion.10-codename
+  echo "-Rust-T2" > localversion.10-codename
   echo "-$pkgrel" > localversion.20-pkgrel
   echo "${pkgbase#linux}" > localversion.30-pkgname
-  make defconfig
-  make -s kernelrelease > version
-  make mrproper
+
+  echo "Setting up Rust compiler version..."
+  rustup install 1.78.0
+  rustup override set 1.78.0
+
+  echo "Installing rust-src..."
+  rustup component add rust-src
+
+  echo "Installing rust-bindgen..."
+  cargo install --locked --version 0.65.1 bindgen-cli
+
+  echo "Verifying that Rust support is available..."
+  make LLVM=1 rustavailable
+
+  make LLVM=1 defconfig
+  make LLVM=1 -s kernelrelease > version
+  make LLVM=1 mrproper
 
   t2linux_patches=$(ls $srcdir/patches | grep -e \.patch$)
   mv $srcdir/patches/*.patch $srcdir/
@@ -95,7 +113,7 @@ build() {
 }
 
 _package() {
-  pkgdesc="The $pkgdesc kernel and modules"
+  pkgdesc="The $pkgdesc kernel and modules with support for Rust written modules"
   depends=(
     coreutils
     initramfs
@@ -109,7 +127,6 @@ _package() {
     KSMBD-MODULE
     VIRTUALBOX-GUEST-MODULES
     WIREGUARD-MODULE
-    linux
   )
   replaces=(
     virtualbox-guest-modules-arch
@@ -128,7 +145,7 @@ _package() {
   echo "$pkgbase" | install -Dm644 /dev/stdin "$modulesdir/pkgbase"
 
   echo "Installing modules..."
-  _make INSTALL_MOD_PATH="$pkgdir/usr" INSTALL_MOD_STRIP=1 \
+  ZSTD_CLEVEL=19 _make INSTALL_MOD_PATH="$pkgdir/usr" INSTALL_MOD_STRIP=1 \
     DEPMOD=/doesnt/exist modules_install  # Suppress depmod
 
   # remove build link
@@ -138,7 +155,6 @@ _package() {
 _package-headers() {
   pkgdesc="Headers and scripts for building modules for the $pkgdesc kernel"
   depends=(pahole)
-  provides=(linux-headers)
 
   cd $_srcname
   local builddir="$pkgdir/usr/lib/modules/$(<version)/build"
@@ -194,6 +210,13 @@ _package-headers() {
 
   echo "Removing loose objects..."
   find "$builddir" -type f -name '*.o' -printf 'Removing %P\n' -delete
+
+  # Rust support
+  echo "Installing Rust files..."
+  install -Dt "$builddir/rust" -m644 scripts/target.json
+  install -Dt "$builddir/rust" -m644 rust/*.rmeta
+  install -Dt "$builddir/rust" -m644 rust/*.so
+  install -Dt "$builddir" -m644 ../../rust-toolchain
 
   echo "Stripping build tools..."
   local file
