@@ -19,6 +19,7 @@ makedepends=(
   cpio
   gettext
   git
+  jq
   llvm
   lld
   libelf
@@ -110,7 +111,9 @@ prepare() {
 
 build() {
   cd $_srcname
-  _make htmldocs all
+  local installed_builddir="/usr/lib/modules/$(<version)/build"
+
+  _make "KRUSTFLAGS=--remap-path-prefix $srcdir/$_srcname=$installed_builddir" htmldocs all rust-analyzer
 }
 
 _package() {
@@ -158,7 +161,8 @@ _package-headers() {
   depends=(pahole)
 
   cd $_srcname
-  local builddir="$pkgdir/usr/lib/modules/$(<version)/build"
+  local installed_builddir="/usr/lib/modules/$(<version)/build"
+  local builddir="$pkgdir$installed_builddir"
 
   echo "Installing build files..."
   install -Dt "$builddir" -m644 .config Makefile Module.symvers System.map \
@@ -217,7 +221,30 @@ _package-headers() {
   install -Dt "$builddir/rust" -m644 scripts/target.json
   install -Dt "$builddir/rust" -m644 rust/*.rmeta
   install -Dt "$builddir/rust" -m644 rust/*.so
+  install -Dt "$builddir/rust" -m644 rust/Makefile
   install -Dt "$builddir" -m644 ../rust-toolchain
+
+  install -Dt "$builddir" -m644 rust-project.json
+  for root_module in $(jq -r '.crates[].root_module' rust-project.json); do
+    # continue if $root_module doesn't start with $srcdir
+    [[ $root_module != $srcdir/$_srcname/* ]] && continue
+    # strip $srcdir from $root_module
+    root_module=${root_module#"$srcdir/$_srcname/"}
+    # if $root_module ends with lib.rs, install all rust files in the directory
+    if [[ $root_module == */lib.rs ]]; then
+      local file
+      while read -rd '' file; do
+        echo "Installing $file to $builddir/$file..."
+        install -Dt "$builddir/$file" -m644 "$file"
+      done < <(find "$(dirname "$root_module")" -type f -name '*.rs' -print0)
+    else
+      echo "Installing $root_module to $builddir/$root_module..."
+      install -Dt "$builddir/$root_module" -m644 "$root_module"
+    fi
+  done
+
+  # Replace $srcdir/$_srcname with $installed_builddir in rust-project.json
+  sed -i "s|$srcdir/$_srcname|$installed_builddir|g" rust-project.json
 
   echo "Stripping build tools..."
   local file
@@ -247,7 +274,8 @@ _package-docs() {
   provides=(linux-docs)
 
   cd $_srcname
-  local builddir="$pkgdir/usr/lib/modules/$(<version)/build"
+  local installed_builddir="/usr/lib/modules/$(<version)/build"
+  local builddir="$pkgdir$installed_builddir"
 
   echo "Installing documentation..."
   local src dst
@@ -256,6 +284,12 @@ _package-docs() {
     dst="$builddir/Documentation/${dst#output/}"
     install -Dm644 "$src" "$dst"
   done < <(find Documentation -name '.*' -prune -o ! -type d -print0)
+
+  # Replace $srcdir/$_srcname with $installed_builddir in all html files in $builddir/Documentation/rust/rustdoc
+  local file
+  while read -rd '' file; do
+    sed -i "s|$srcdir/$_srcname|$installed_builddir|g" "$file"
+  done < <(find "$builddir/Documentation/rust/rustdoc" -type f -name '*.html' -print0)
 
   echo "Adding symlink..."
   mkdir -p "$pkgdir/usr/share/doc"
