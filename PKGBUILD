@@ -73,8 +73,8 @@ prepare() {
   echo "${pkgbase#linux}" > localversion.30-pkgname
 
   echo "Setting up Rust compiler version..."
-  rustup install 1.78.0
-  rustup override set 1.78.0
+  rustup install 1.81.0
+  rustup override set 1.81.0
 
   echo "Installing rust-src..."
   rustup component add rust-src
@@ -113,7 +113,8 @@ build() {
   cd $_srcname
   local installed_builddir="/usr/lib/modules/$(<version)/build"
 
-  _make "KRUSTFLAGS=--remap-path-prefix $srcdir/$_srcname=$installed_builddir" htmldocs all rust-analyzer
+  _make "KRUSTFLAGS=-Z unstable-options --remap-path-prefix $srcdir/$_srcname=$installed_builddir" \
+    htmldocs all rust-analyzer
 }
 
 _package() {
@@ -244,7 +245,7 @@ _package-headers() {
   done
 
   # Replace $srcdir/$_srcname with $installed_builddir in rust-project.json
-  sed -i "s|$srcdir/$_srcname|$installed_builddir|g" rust-project.json
+  sed -i "s|$srcdir/$_srcname|$installed_builddir|g" "$builddir/rust-project.json"
 
   echo "Stripping build tools..."
   local file
@@ -309,7 +310,7 @@ for _p in "${pkgname[@]}"; do
 done
 
 sha256sums=('57fb43d83491188b4356f9c04a37ad4f316eb0b8595429bd0754335aae3e84fa'
-            'd9ca7270b75f6eb83074d82c09f8faed2d3fb8cf80b5a6e748671ec2c3b10535'
-            'b983697fa79e6dc7320b2c54f89409307d49b5cafcb56194866cdfa5dab0b5e5'
+            '148c8cbe8e9ca3dbe1a19fc696882a3ec81a31fe599a203253e69cd9c24fbab7'
+            '7ff8654efc550e7ed15bf7212a6d7358f98ad1455beafa46d26ecbb21fc062bf'
             'SKIP')
 # vim:set ts=8 sts=2 sw=2 et:
