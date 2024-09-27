@@ -44,6 +44,7 @@ T2_PATCH_HASH=0888a93f7ebabbfb8e6c5c8f108de188d3927eb1
 source=(
   https://github.com/archlinux/linux/archive/refs/tags/v${pkgver}-arch${archrel}.tar.gz
   config  # the main kernel config file
+  rust-toolchain
 
   # t2linux Patches
   patches::git+https://github.com/t2linux/linux-t2-patches#commit=$T2_PATCH_HASH
@@ -216,7 +217,7 @@ _package-headers() {
   install -Dt "$builddir/rust" -m644 scripts/target.json
   install -Dt "$builddir/rust" -m644 rust/*.rmeta
   install -Dt "$builddir/rust" -m644 rust/*.so
-  install -Dt "$builddir" -m644 ../../rust-toolchain
+  install -Dt "$builddir" -m644 ../rust-toolchain
 
   echo "Stripping build tools..."
   local file
@@ -275,5 +276,6 @@ done
 
 sha256sums=('57fb43d83491188b4356f9c04a37ad4f316eb0b8595429bd0754335aae3e84fa'
             'd9ca7270b75f6eb83074d82c09f8faed2d3fb8cf80b5a6e748671ec2c3b10535'
+            'b983697fa79e6dc7320b2c54f89409307d49b5cafcb56194866cdfa5dab0b5e5'
             'SKIP')
 # vim:set ts=8 sts=2 sw=2 et:
