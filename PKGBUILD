@@ -49,6 +49,9 @@ source=(
 
   # t2linux Patches
   patches::git+https://github.com/t2linux/linux-t2-patches#commit=$T2_PATCH_HASH
+
+  # Additional patches
+  9001-AsahiLinux.patch
 )
 validpgpkeys=(
   ABAF11C65A2970B130ABE3C479BE3E4300411886  # Linus Torvalds
@@ -226,26 +229,13 @@ _package-headers() {
   install -Dt "$builddir" -m644 ../rust-toolchain
 
   install -Dt "$builddir" -m644 rust-project.json
-  for root_module in $(jq -r '.crates[].root_module' rust-project.json); do
-    # continue if $root_module doesn't start with $srcdir
-    [[ $root_module != $srcdir/$_srcname/* ]] && continue
-    # strip $srcdir from $root_module
-    root_module=${root_module#"$srcdir/$_srcname/"}
-    # if $root_module ends with lib.rs, install all rust files in the directory
-    if [[ $root_module == */lib.rs ]]; then
-      local file
-      while read -rd '' file; do
-        echo "Installing $file to $builddir/$file..."
-        install -Dt "$builddir/$file" -m644 "$file"
-      done < <(find "$(dirname "$root_module")" -type f -name '*.rs' -print0)
-    else
-      echo "Installing $root_module to $builddir/$root_module..."
-      install -Dt "$builddir/$root_module" -m644 "$root_module"
-    fi
-  done
-
-  # Replace $srcdir/$_srcname with $installed_builddir in rust-project.json
   sed -i "s|$srcdir/$_srcname|$installed_builddir|g" "$builddir/rust-project.json"
+
+  local file
+  while read -rd '' file; do
+    echo "Installing $file to $builddir/$file"
+    install -D -m644 "$file" "$builddir/$file"
+  done < <(find rust -type f -name '*.rs' -print0)
 
   echo "Stripping build tools..."
   local file
@@ -312,5 +302,6 @@ done
 sha256sums=('57fb43d83491188b4356f9c04a37ad4f316eb0b8595429bd0754335aae3e84fa'
             '148c8cbe8e9ca3dbe1a19fc696882a3ec81a31fe599a203253e69cd9c24fbab7'
             '7ff8654efc550e7ed15bf7212a6d7358f98ad1455beafa46d26ecbb21fc062bf'
-            'SKIP')
+            'SKIP'
+            '2881846b586f7bd93c8740fe7d61c493f5624c6464d0d0db660bbd8a772a63d9')
 # vim:set ts=8 sts=2 sw=2 et:

@@ -1,0 +1,2 @@
+:!Documentation/core-api/printk-formats.rst
+:!lib/vsprintf.c
