@@ -1,2 +1,3 @@
 :!Documentation/core-api/printk-formats.rst
 :!lib/vsprintf.c
+:!drivers/net/wireless/broadcom
