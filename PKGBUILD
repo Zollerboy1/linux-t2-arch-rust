@@ -5,12 +5,13 @@
 #               apple-ibridge drivers, respectively.
 
 pkgbase="linux-t2-rust"
-pkgver=6.10.9
-_srcname=linux-${pkgver}
+_pkgver=6.11
+pkgver=${_pkgver}.0
+_srcname=linux-${_pkgver}
 pkgrel=1
 archrel=1
 pkgdesc='Linux kernel for T2 Macs'
-_srctag=v${pkgver%.*}-${pkgver##*.}
+_srctag=v${_pkgver%.*}-${_pkgver##*.}
 url="https://github.com/archlinux/linux/commits/$_srctag"
 arch=(x86_64)
 license=(GPL2)
@@ -40,10 +41,10 @@ makedepends=(
 conflicts=('apple-gmux-t2-dkms-git')
 replaces=('apple-gmux-t2-dkms-git')
 options=('!strip')
-_srcname="linux-${pkgver}-arch${archrel}"
-T2_PATCH_HASH=0888a93f7ebabbfb8e6c5c8f108de188d3927eb1
+_srcname="linux-${_pkgver}-arch${archrel}"
+T2_PATCH_HASH=54b4f914930d92cf0b94601b402ec93f54a76390
 source=(
-  https://github.com/archlinux/linux/archive/refs/tags/v${pkgver}-arch${archrel}.tar.gz
+  https://github.com/archlinux/linux/archive/refs/tags/v${_pkgver}-arch${archrel}.tar.gz
   config  # the main kernel config file
   rust-toolchain
 
@@ -302,11 +303,11 @@ for _p in "${pkgname[@]}"; do
   }"
 done
 
-sha256sums=('57fb43d83491188b4356f9c04a37ad4f316eb0b8595429bd0754335aae3e84fa'
+sha256sums=('364bb32cadd41401f686dd58c58a08432f927aabdb35e2482ba62a4a559bd24d'
             '148c8cbe8e9ca3dbe1a19fc696882a3ec81a31fe599a203253e69cd9c24fbab7'
             '7ff8654efc550e7ed15bf7212a6d7358f98ad1455beafa46d26ecbb21fc062bf'
             'SKIP'
-            '762fc093f9858103a5bf7631f33973720016d1aa9d5f10a695a969181d0d126e'
+            'f09efb2507226c6a4d2a6e65a667460027b492469828f3a0e954b6702fa8d44f'
             '05384345f829abd75dffd9a0888167606f09d18500e8663ef6e3e542beb2948a'
             'f5800e38366fd6e8975311c6ac6a4fdc2b01e133098c50c690f010bac697b245'
             'd5fce1f295717acf313f50968b0e7697eb549fd06becefd60357902a1616b255')
