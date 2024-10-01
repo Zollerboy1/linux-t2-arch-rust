@@ -1,0 +1,12 @@
+diff --git a/rust/bindings/bindings_helper.h b/rust/bindings/bindings_helper.h
+index 2d91dd535fba..5ba5a5e717d0 100644
+--- a/rust/bindings/bindings_helper.h
++++ b/rust/bindings/bindings_helper.h
+@@ -17,6 +17,7 @@
+ #include <drm/drm_syncobj.h>
+ #include <drm/gpu_scheduler.h>
+ #include <kunit/test.h>
++#include <linux/cdev.h>
+ #include <linux/delay.h>
+ #include <linux/device.h>
+ #include <linux/dma-fence.h>

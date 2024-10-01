@@ -52,6 +52,9 @@ source=(
 
   # Additional patches
   9001-AsahiLinux.patch
+  9002-Rust-Improvements.patch
+  9003-Rust-File-Abstraction.patch
+  9004-Rust-Opaque-try_ffi_init.patch
 )
 validpgpkeys=(
   ABAF11C65A2970B130ABE3C479BE3E4300411886  # Linus Torvalds
@@ -303,5 +306,8 @@ sha256sums=('57fb43d83491188b4356f9c04a37ad4f316eb0b8595429bd0754335aae3e84fa'
             '148c8cbe8e9ca3dbe1a19fc696882a3ec81a31fe599a203253e69cd9c24fbab7'
             '7ff8654efc550e7ed15bf7212a6d7358f98ad1455beafa46d26ecbb21fc062bf'
             'SKIP'
-            '762fc093f9858103a5bf7631f33973720016d1aa9d5f10a695a969181d0d126e')
+            '762fc093f9858103a5bf7631f33973720016d1aa9d5f10a695a969181d0d126e'
+            '05384345f829abd75dffd9a0888167606f09d18500e8663ef6e3e542beb2948a'
+            'f5800e38366fd6e8975311c6ac6a4fdc2b01e133098c50c690f010bac697b245'
+            'd5fce1f295717acf313f50968b0e7697eb549fd06becefd60357902a1616b255')
 # vim:set ts=8 sts=2 sw=2 et:
